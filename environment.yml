@@ -1,0 +1,7 @@
+name: pychip8
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - numpy
+prefix: /home/csobral/miniconda3/envs/pychip8
