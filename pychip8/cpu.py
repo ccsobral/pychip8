@@ -63,8 +63,9 @@ class Cpu:
         }
     
         self._opcode_0nnn_table = {
-            0x0: self._op_00e0,
-            0xe: self._op_00ee,
+            0x00: self._op_0000,
+            0xe0: self._op_00e0,
+            0xee: self._op_00ee,
         }
 
         self._opcode_8xyn_table = {
@@ -135,7 +136,7 @@ class Cpu:
             self._memory[self._program_counter].astype(self._opcode.dtype) << 8 
             | self._memory[self._program_counter+1]
         )
-        #print(hex(self._opcode[0]))
+        print(hex(self._opcode[0]))
 
         #Enough opcodes use these to be worth initialising here once
         vx = (self._opcode & 0x0F00) >> 8
@@ -155,7 +156,7 @@ class Cpu:
         self._opcode_main_table[idx[0]]()
     
     def _lookup_opcode_0nnn(self):
-        idx = self._opcode & 0x000F
+        idx = self._opcode & 0x00FF
         self._opcode_0nnn_table[idx[0]]()
     
     def _lookup_opcode_8xyn(self):
@@ -171,6 +172,9 @@ class Cpu:
         self._opcode_fxnn_table[idx[0]]()
 
     """Here starts the definitions of the different opcodes"""
+    def _op_0000(self):
+        raise ValueError('\n\nEND OF CODE\n\n')
+
     #Clear the screen
     def _op_00e0(self):
         self.pixel_buffer[:] = False
@@ -355,8 +359,7 @@ class Cpu:
         """The fontset starts at._memory[0], each digit is 5 bytes long
         so the address of each digit sprite is simply the digit*5
         """
-        sprite_hex = self._v_regs[self._vx]
-        np.copyto(self._i_reg, self._memory[5*sprite_hex])
+        np.copyto(self._i_reg, 5*self._v_regs[self._vx])
 
     #Store binary-coded decimal of value in VX in._memory at I, I+1, and I+2
     def _op_fx33(self):
@@ -364,16 +367,16 @@ class Cpu:
         self._memory[self._i_reg+1] = (self._v_regs[self._vx] % 100) // 10
         self._memory[self._i_reg+2] = (self._v_regs[self._vx] % 10)
 
-    #Store values V0 to VX in._memory at I, I+1, ...; set I to I+X+1
+    #Store values V0 to VX (inclusive) in _memory at I, I+1, ...; set I to I+X+1
     def _op_fx55(self):
         ireg = self._i_reg[0]
-        vx = self._vx[0]
+        vx = self._vx[0] + 1
         self._memory[ireg:ireg+vx] = self._v_regs[:vx]
         np.copyto(self._i_reg, self._i_reg + self._vx + 1)
 
-    #Fill V0 to VX (inc.) with values in._memory at I, I+1, ...; set I to I+X+1
+    #Fill V0 to VX (inc.) with values in memory at I, I+1, ...; set I to I+X+1
     def _op_fx65(self):
         ireg = self._i_reg[0]
-        vx = self._vx[0]
+        vx = self._vx[0] + 1
         self._v_regs[:vx] = self._memory[ireg:ireg+vx]
         np.copyto(self._i_reg, self._i_reg + self._vx + 1)
