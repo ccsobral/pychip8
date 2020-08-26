@@ -18,8 +18,6 @@ class Display:
     _original_width, _original_height = 64, 32
     
     def __init__(self, tk_manager: tk.Tk, display_scale: int = 10):
-        #self._check_integer_dimensions(display_size)
-        #self._check_valid_dimensions()
         self._display_scale = display_scale
         self._width = self._display_scale * Display._original_width
         self._height = self._display_scale * Display._original_height
@@ -41,43 +39,6 @@ class Display:
         self._display.pack()
         self._create_pixel_grid()
     
-    #def _check_integer_dimensions(self, display_size: str):
-    #    """Raises error if display_size can't be split into two integers.
-    #    """
-
-    #    try:
-    #        self._width, self._height = map(int, display_size.split('x'))
-    #    except ValueError:
-    #        print(
-    #            'Could not extract width and height from display size!',
-    #            f'The input display size was {display_size!r}\n',
-    #            sep='\n'
-    #        )
-    #        raise
-
-    #def _check_valid_dimensions(self):
-    #    """Raises error if the requested dimensions of the tkinter window
-    #    are not multiple of 64x32.
-
-    #    This may change later on, but I think the output looks distorted
-    #    if the width and height of the window can take arbitrary values.
-
-    #    Raises:
-    #        ValueError: if width not multiple of 64 or height not multiple of 32.
-    #    """
-
-    #    self._is_width_multiple = (
-    #        True if self._width % Display._original_width == 0 else False
-    #    )
-    #    self._is_height_multiple = (
-    #        True if self._height % Display._original_height == 0 else False
-    #    )
-    #    if not self._is_width_multiple or not self._is_height_multiple:
-    #        raise ValueError(
-    #            'Display width should be a number multiple of 64'
-    #            ' and height should be multiple of 32.'
-    #        )
-
     def _create_pixel_grid(self):
         """Defines the virtual 64x32 Chip8 display.
 
