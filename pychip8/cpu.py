@@ -32,7 +32,7 @@ class Cpu:
         self._vy = np.zeros(1, dtype=np.uint8)
 
         #Variables that are accessed by the IO
-        self.pixel_buffer = np.zeros((32,64), dtype=np.bool)
+        self.pixel_buffer = np.zeros(32*64, dtype=np.bool)
         self.draw_flag = np.zeros(1, dtype=np.bool)
         self.key_presses = np.zeros(16, dtype=np.bool)
 
@@ -136,7 +136,7 @@ class Cpu:
             self._memory[self._program_counter].astype(self._opcode.dtype) << 8 
             | self._memory[self._program_counter+1]
         )
-        print(hex(self._opcode[0]))
+        #print(hex(self._opcode[0]))
 
         #Enough opcodes use these to be worth initialising here once
         vx = (self._opcode & 0x0F00) >> 8
@@ -294,6 +294,9 @@ class Cpu:
         x_pos = self._v_regs[self._vx][0] % 64
         y_pos = self._v_regs[self._vy][0] % 32
 
+        #Reshape buffer for easier handling
+        buffer = self.pixel_buffer.reshape(32, 64)
+
         #Set VF = 0 unless any ON pixel is turned OFF
         self._v_regs[-1] = 0
         #Reminder that each sprite in the fontset is a column of 5 bytes
@@ -304,14 +307,14 @@ class Cpu:
                 #so this picks up each bit in sprite_byte one by one
                 if (sprite_byte & (128 >> pixel_bit)) != 0:
                     #if already set, XOR will unset it so make VF = 1
-                    if y_pos + row >= self.pixel_buffer.shape[0]:
+                    if y_pos + row >= buffer.shape[0]:
                         continue
-                    if x_pos + pixel_bit >= self.pixel_buffer.shape[1]:
+                    if x_pos + pixel_bit >= buffer.shape[1]:
                         continue
-                    if self.pixel_buffer[y_pos+row][x_pos+pixel_bit] != 0:
+                    if buffer[y_pos+row][x_pos+pixel_bit] != 0:
                         self._v_regs[-1] = 1
                     #XOR with current pixel value
-                    self.pixel_buffer[y_pos+row][x_pos+pixel_bit] ^= 1
+                    buffer[y_pos+row][x_pos+pixel_bit] ^= 1
 
         np.copyto(self.draw_flag, True)
                     
